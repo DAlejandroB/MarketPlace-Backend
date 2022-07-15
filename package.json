@@ -1,0 +1,22 @@
+{
+  "name": "farmarketbackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DAlejandroB/MarketPlace-Backend.git"
+  },
+  "author": "Diego Ballesteros, Daniel Gomez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DAlejandroB/MarketPlace-Backend/issues"
+  },
+  "homepage": "https://github.com/DAlejandroB/MarketPlace-Backend#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}

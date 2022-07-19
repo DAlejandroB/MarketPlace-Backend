@@ -1,9 +1,9 @@
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
-const connection = require('../database/db')
+const jwt = require('jsonwebtoken')             //JSON web Token Library used for token management 
+const bcryptjs = require('bcryptjs')              //Library used for password encryption 
+const connection = require('../database/db')    //For database operations
 const {promisify} = require('util')
 
-//Register method
+//Register POST method
 exports.register = async(req, res) => {
     
     try{
@@ -18,5 +18,27 @@ exports.register = async(req, res) => {
         })
     }catch(error){
         console.log(error)
+    }
+}
+
+//Login POST Methods
+exports.login = async(req, res) => {
+    try{
+        const userEmail = req.body.email;
+        const password = req.body.password;
+
+        console.log(userEmail + "\n" + password);
+
+        connection.query('SELECT * FROM users WHERE email = ?', [userEmail], async (error, results) =>{
+                if(results.length == 0 || ! (await bcryptjs.compare(password, results[0].password))){
+                    res.send("Usuario o contraseña incorrectos")
+                }
+                else{
+                    //Placeholder for valid login
+                    console.log(results)
+                }
+        })
+    }catch{
+
     }
 }

@@ -26,7 +26,7 @@ app.use(express.urlencoded({extended:true}))
 dotenv.config({path:'./env/.env'});
 
 //Cookie setting
-//app.use(cookieParser);
+app.use(cookieParser());
 
 //Calling router
 app.use('/', require('./routes/router'))

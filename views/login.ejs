@@ -1,3 +1,29 @@
-<h1>
-    Login vista
-</h1>
+<!-- HTML file for login test porpouses -->
+<head>
+
+</head>
+<body>
+    <form>
+        <input type="email" name="EmailTextField" id="email">
+        <input type="password" name="PasswordField" id="pass">
+        <input type="button" value="Submit" id="myButton">
+        <script>
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('POST', 'http://localhost:3000/login',true)
+            xhr.setRequestHeader('Content-Type', 'application/json')
+
+            let btn = document.getElementById('myButton');
+            btn.addEventListener("click", () => {
+                let emailField = document.getElementById('email');
+                let passField = document.getElementById('pass');
+                console.log('Email: ' + emailField.value)
+                console.log('Pass: ' + passField.value)
+                xhr.send(JSON.stringify({
+                    email:emailField.value,
+                    password:passField.value
+                }))
+            })
+        </script>
+    </form>
+</body>

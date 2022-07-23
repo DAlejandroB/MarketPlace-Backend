@@ -10,6 +10,9 @@ router.get('/', (req, res) =>{
 router.get('/login', (req,res) =>{
     res.render('login')
 })
+router.get('/index', (req,res) =>{
+    res.render('index')
+})
 //Register route setting
 router.get('/registro', (req,res) =>{
     res.render('register')
@@ -18,6 +21,10 @@ router.get('/registro', (req,res) =>{
 router.post('/register', controller.register)
 
 router.post('/login', controller.login)
+
+//router.post('/update', controller.isAuthenticated , controller.update)
+
+router.post('/logout', controller.logout)
 
 module.exports = router
 

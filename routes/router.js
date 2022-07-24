@@ -22,9 +22,11 @@ router.post('/register', controller.register)
 
 router.post('/login', controller.login)
 
-//router.post('/update', controller.isAuthenticated , controller.update)
+router.post('/update', controller.isAuthenticated , controller.update)
 
-router.post('/logout', controller.logout)
+router.post('/delete', controller.isAuthenticated, controller.delete)
+
+router.get('/logout', controller.logout)
 
 module.exports = router
 

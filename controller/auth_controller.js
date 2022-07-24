@@ -37,24 +37,19 @@ exports.login = async(req, res) => {
 
         connection.query('SELECT * FROM users WHERE email = ?', [userEmail], async (error, results) =>{
                 if(results.length == 0 || ! (await bcryptjs.compare(password, results[0].password))){
-                    res.send("Usuario o contraseña incorrectos")
+                    res.send("User or password not correct")
                 }
                 else{
                     //Token Creation using user unique ID
-                    const id = results[0].id
-                    const token = jwt.sign({id:id}, process.env.JWT_KEY , {
+                    const user_id = results[0].user_id
+                    const token = jwt.sign({user_id}, process.env.JWT_KEY , {
                         expiresIn : process.env.JWT_EXPIRE_TIME,
                     })
-
-                    const cookieOptions = {
-                        expires: new Date(Date.now()+process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000),
-                        httpOnly:true
+                    const response = {
+                        message: 'Succesful Login',
+                        token: token
                     }
-                    res.cookie('jwt', token, cookieOptions)
-                    res.send({
-                        message:'Login Exitoso',
-                        user:results[0].name
-                    })
+                    res.send(response)
                 }
         })
     }catch (error){
@@ -62,33 +57,50 @@ exports.login = async(req, res) => {
     }
 }
 
-//Update user data
+/*Update user data
+The body request must contain all user data, this is done in order to facilitate DB insertion
+*/
 exports.update = async(req, res) =>{
     try{
-        console.log("El usuario quiere actualizar su data" + req)
+        connection.query('UPDATE users SET name=?, password=? WHERE user_id = ? ', [req.body.name, req.body.password, req.body.user.user_id], (error, result) => {
+            if (error) throw console.log(error);
+            console.log(result.affectedRows + " record(s) updated");
+        })
+        res.send("Acceso a metodo update")
     }catch(error){
-        console.log(error);
+        if(error.code =='ERR_HTTP_HEADERS_SENT')
+            console.log("A non valid response has already been sent to the user")
+        else
+            console.log(error);
     }
 }
-
+exports.delete = async(req,res) =>{
+    try{
+        console.log(req.body);
+        connection.query('DELETE FROM users WHERE user_id = ?', [req.body.user.user_id], (error, result) =>{
+            if(error) console.log(error);
+            console.log(result.affectedRows + " records deleted");
+            res.send("User deleted succesfully")
+        })
+    }catch (error){
+        console.log(error)
+    }
+}
 //User authentication method
 exports.isAuthenticated = async(req, res, next) =>{
-    if(req.cookies.jwt){
-        try{
-            const decoded = await promisify(jwt.verify)(req.cookie.jwt, process.env.JWT_KEY)
-            conexion.query('SELECT * FROM users WHERE id = ?', [decoded.id], (error,results) =>{
-                if(!results){return next()}
-                req.user = results[0];
-                return next()
-            })
-        }catch(error){
-            console.log(error)
-        }
+    const token = req.body.token || req.query.token || req.headers["x-access-token"];
+
+    if(!token){
+        res.send("A token is required for authentication")
     }else{
-        console.log("Cookie required")
-        res.redirect("/index")
-        res.send("User not authenticated")
+        try{
+            const decoded = jwt.verify(token, process.env.JWT_KEY);
+            req.body.user = decoded;
+        }catch(error){
+            return res.send("Invalid Token");
+        }
     }
+    return next();
 }
 
 exports.logout = (req, res) =>{

@@ -5,7 +5,8 @@ const {promisify} = require('util')
 
 //Register POST method
 exports.register = async(req, res) => {
-    
+    console.log("Registro de usurio!")
+    console.log(req.body);
     try{
         const name = req.body.name
         const email = req.body.email
@@ -15,13 +16,19 @@ exports.register = async(req, res) => {
             if(error){
                 switch(error.code){
                     case'ER_DUP_ENTRY':
-                    res.send("Email Duplicado");
+                    res.send({
+                        message: "Email Duplicado"
+                    })
                     break;
                     default:
-                    res.send("Error de Base de Datos")
+                        res.send({
+                            message: "Error de Base de Datos"
+                        })
                 }
             }else{
-                res.send("Registro Exitoso")
+                res.send({
+                    message: "Registro Exitoso"
+                })
             }
         })
     }catch(error){
@@ -29,7 +36,9 @@ exports.register = async(req, res) => {
     }
 }
 
-//Login POST Methods
+/*Login POST Method
+The token only includes user_id field for query porpuses
+*/
 exports.login = async(req, res) => {
     try{
         const userEmail = req.body.email;
@@ -37,7 +46,9 @@ exports.login = async(req, res) => {
 
         connection.query('SELECT * FROM users WHERE email = ?', [userEmail], async (error, results) =>{
                 if(results.length == 0 || ! (await bcryptjs.compare(password, results[0].password))){
-                    res.send("User or password not correct")
+                    res.send({
+                            message:"Usuario o contraseña incorrecta"
+                        })
                 }
                 else{
                     //Token Creation using user unique ID
@@ -57,16 +68,16 @@ exports.login = async(req, res) => {
     }
 }
 
-/*Update user data
-The body request must contain all user data, this is done in order to facilitate DB insertion
-*/
-exports.update = async(req, res) =>{
+/*Update user data*/
+exports.updateUser = async(req, res) =>{
+    console.log(req.body);
     try{
-        connection.query('UPDATE users SET name=?, password=? WHERE user_id = ? ', [req.body.name, req.body.password, req.body.user.user_id], (error, result) => {
+        connection.query('UPDATE users SET name=? WHERE email = ? ', [req.body.valueNew, req.body.email], (error, result) => {
             if (error) throw console.log(error);
-            console.log(result.affectedRows + " record(s) updated");
         })
-        res.send("Acceso a metodo update")
+        res.send({
+            message: "Usuario modificado"}
+            )
     }catch(error){
         if(error.code =='ERR_HTTP_HEADERS_SENT')
             console.log("A non valid response has already been sent to the user")
@@ -74,6 +85,35 @@ exports.update = async(req, res) =>{
             console.log(error);
     }
 }
+exports.updatePassword = async(req, res) =>{
+    try{
+        const userEmail = req.body.email;
+        const oldPass = req.body.passOld;
+        const newPass = req.body.passNew;
+
+        connection.query('SELECT * FROM users WHERE email = ?', [userEmail], async (error, results) =>{
+                if(results.length == 0 || ! (await bcryptjs.compare(oldPass, results[0].password))){
+                    res.send({
+                        message:"User or password not correct"
+                    })
+                }
+                else{
+                    const hashedPass = await bcryptjs.hash(newPass, 8);
+                    connection.query('UPDATE users SET password=? WHERE email=?', [hashedPass, userEmail], async(error, result) =>{
+                        if (error) throw console.log(error);
+                        console.log(result.affectedRows + " record(s) updated");
+                        res.send({
+                            message:"Password modificada correctamente"
+                        })
+                    });
+                }
+        })
+    }catch (error){
+        console.log(error);
+    }    
+}
+
+/* Delete user using id included in the token */
 exports.delete = async(req,res) =>{
     try{
         console.log(req.body);
@@ -88,16 +128,20 @@ exports.delete = async(req,res) =>{
 }
 //User authentication method
 exports.isAuthenticated = async(req, res, next) =>{
-    const token = req.body.token || req.query.token || req.headers["x-access-token"];
-
+    const token = req.body.token || req.query.token || req.headers["tokenstring"];
+    console.log("Doing Auth")
     if(!token){
-        res.send("A token is required for authentication")
+        res.send({
+            message: "A token is required for authentication"
+        })
     }else{
         try{
             const decoded = jwt.verify(token, process.env.JWT_KEY);
             req.body.user = decoded;
         }catch(error){
-            return res.send("Invalid Token");
+            return res.send({
+                message: "Invalid Token"
+            });
         }
     }
     return next();

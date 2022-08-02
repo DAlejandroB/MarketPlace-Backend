@@ -9,6 +9,7 @@ const port = 3000;
 //Modules inicialization
 const express = require('express')
 const dotenv = require('dotenv')
+const cors = require('cors')
 
 //App creation
 const app = express()
@@ -20,6 +21,7 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'))
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+app.use(cors())
 
 //Enviroment Variable Setting
 dotenv.config({path:'./env/.env'});

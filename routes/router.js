@@ -22,7 +22,8 @@ router.post('/register', controller.register)
 
 router.post('/login', controller.login)
 
-router.post('/update', controller.isAuthenticated , controller.update)
+router.post('/updateuser', controller.isAuthenticated , controller.updateUser)
+router.put('/updatepass', controller.isAuthenticated, controller.updatePassword)
 
 router.post('/delete', controller.isAuthenticated, controller.delete)
 

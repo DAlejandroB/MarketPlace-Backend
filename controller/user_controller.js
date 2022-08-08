@@ -1,12 +1,10 @@
 const jwt = require('jsonwebtoken')             //JSON web Token Library used for token management 
 const bcryptjs = require('bcryptjs')            //Library used for password encryption 
 const connection = require('../database/db')    //For database operations
-const {promisify} = require('util')
 
 //Register POST method
 exports.register = async(req, res) => {
-    console.log("Registro de usurio!")
-    console.log(req.body);
+    console.log("Registro de usuario!")
     try{
         const name = req.body.name
         const email = req.body.email
@@ -16,19 +14,13 @@ exports.register = async(req, res) => {
             if(error){
                 switch(error.code){
                     case'ER_DUP_ENTRY':
-                    res.send({
-                        message: "Email Duplicado"
-                    })
+                    res.send({message: "Email Duplicado"})
                     break;
                     default:
-                        res.send({
-                            message: "Error de Base de Datos"
-                        })
+                        res.send({message: "Error de Base de Datos"})
                 }
             }else{
-                res.send({
-                    message: "Registro Exitoso"
-                })
+                res.send({message: "Registro Exitoso"})
             }
         })
     }catch(error){
@@ -58,6 +50,7 @@ exports.login = async(req, res) => {
                     })
                     const response = {
                         message: 'Succesful Login',
+                        user_id: user_id,
                         token: token
                     }
                     res.send(response)
@@ -129,7 +122,6 @@ exports.delete = async(req,res) =>{
 //User authentication method
 exports.isAuthenticated = async(req, res, next) =>{
     const token = req.body.token || req.query.token || req.headers["tokenstring"];
-    console.log("Doing Auth")
     if(!token){
         res.send({
             message: "A token is required for authentication"

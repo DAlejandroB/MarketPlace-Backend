@@ -1,33 +1,35 @@
 const express = require('express')
 const router = express.Router()
 
-const controller = require('../controller/auth_controller')
-//Root GET route setting
-router.get('/', (req, res) =>{
-    res.render('index')
-});
-//Login route setting
-router.get('/login', (req,res) =>{
-    res.render('login')
-})
-router.get('/index', (req,res) =>{
-    res.render('index')
-})
-//Register route setting
-router.get('/registro', (req,res) =>{
-    res.render('register')
-})
+const userController = require('../controller/user_controller')
+const publications_controller = require('../controller/publications_controller');
 
-router.post('/register', controller.register)
+//List of hhtp methods related to the user
+router.post('/register', userController.register)
 
-router.post('/login', controller.login)
+router.post('/login', userController.login)
 
-router.post('/updateuser', controller.isAuthenticated , controller.updateUser)
-router.put('/updatepass', controller.isAuthenticated, controller.updatePassword)
+router.post('/updateuser', userController.isAuthenticated , userController.updateUser)
 
-router.post('/delete', controller.isAuthenticated, controller.delete)
+router.put('/updatepass', userController.isAuthenticated, userController.updatePassword)
 
-router.get('/logout', controller.logout)
+router.post('/delete', userController.isAuthenticated, userController.delete)
+
+router.get('/logout', userController.logout)
+
+//List of http methods related to interests & publications
+
+router.post('/add-publication', userController.isAuthenticated ,publications_controller.addPublication);
+
+router.get('/all-publications', publications_controller.allPublications);
+
+router.get('/delete-publication', userController.isAuthenticated, publications_controller.deletePublication);
+
+router.post('/add-interest', userController.isAuthenticated, publications_controller.addInterest);
+
+router.post('/delete-interest', userController.isAuthenticated, publications_controller.deleteInterest);
+
+router.get('/user-interests', userController.isAuthenticated, publications_controller.userInterests);
 
 module.exports = router
 

@@ -132,3 +132,29 @@ exports.userInterests = async(req, res) =>{
         console.log(error);
     }
 }
+
+exports.userPublications = async(req, res) => {
+    try{
+        connection.query(
+        "select " +
+            "P.pub_id AS id_publication, " +
+            "P.title AS titulo, "+
+            "U.email AS emailOwner, "+
+            "P.aviable AS isAviable, "+
+            "P.type AS productType, "+
+            "P.description, " +
+            "U.name AS ownerName, "+
+            "P.image_address AS imageAddress " +
+        "from publications AS P inner Join users AS U on P.user_id = U.user_id "+
+        "WHERE U.user_id = ?", 
+        [req.body.userId], (error, result) =>{
+            if(error)
+                console.log(error);
+            else{
+                res.send(result);
+            }
+        });
+    }catch(error){
+        console.log(error);
+    }
+}

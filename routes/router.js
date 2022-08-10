@@ -23,13 +23,15 @@ router.post('/add-publication', userController.isAuthenticated ,publications_con
 
 router.get('/all-publications', publications_controller.allPublications);
 
-router.get('/delete-publication', userController.isAuthenticated, publications_controller.deletePublication);
+router.post('/delete-publication', userController.isAuthenticated, publications_controller.deletePublication);
 
 router.post('/add-interest', userController.isAuthenticated, publications_controller.addInterest);
 
 router.post('/delete-interest', userController.isAuthenticated, publications_controller.deleteInterest);
 
 router.get('/user-interests', userController.isAuthenticated, publications_controller.userInterests);
+
+router.get('/user-publication', userController.isAuthenticated, publications_controller.userPublications);
 
 module.exports = router
 

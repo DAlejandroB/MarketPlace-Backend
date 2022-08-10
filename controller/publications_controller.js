@@ -5,18 +5,21 @@ const { Readable } = require('stream')
 const client = new ImgurClient({ clientId: '713ee8613b65fb1', clientSecret: '7498566159ec695e8ec6535e25cad02e9ec68502'});
 const fs = require('fs');
 
-const uploadImage = async(imageStream, userId, pubId) =>{
+const uploadImage = async(base64String, userId, pubId) =>{
+    convertB64toImage(base64String);
     const response = await client.upload({
-        image: imageStream,
+        image: fs.createReadStream('temp_image.png'),
         title: `pub_img-${userId}${pubId}`
     })
+    console.log(typeof response.data.link);
     return response.data.link;
 }
 
-const convertB64toStream = async(base64String) => {
+const convertB64toImage = async(base64String) => {
+    const formattedString = base64String.replace("data:image/png;base64,","");
     try{
-        const buffer = Buffer.from(base64String, "base64");
-        return Readable.from(buffer)
+        const buffer = Buffer.from(formattedString, "base64");
+        fs.writeFileSync('temp_image.png', buffer);
     }catch(error){
         console.log(error);
     }
@@ -26,16 +29,16 @@ const convertB64toStream = async(base64String) => {
 //Create/Add publication methods
 exports.addPublication = async(req, res) => {
     const isAviable = req.body.isAviable? 1 : 0;
-    const pubImgAddress = uploadImage(convertB64toStream(req.body.imageAddress));
+    const pubImgAddress = await uploadImage(req.body.imageAddress);
     try{
         connection.query('INSERT INTO publications SET ?', 
             {
-                user_id:req.body.userId,
-                title:req.body.title,
+                user_id:req.body.user.user_id,
+                title:req.body.titulo,
                 aviable:isAviable,
                 description:req.body.description,
                 image_address: pubImgAddress,
-                type:req.body.publicationType
+                type:req.body.productType
             }, (error, result)=>{
             if(error){
                 console.log(error)
@@ -80,8 +83,11 @@ exports.allPublications = async(req, res) =>{
 
 //Delete publications 
 exports.deletePublication = async(req, res) => {
-    try{
-            connection.query("DELETE FROM publications WHERE user_id = ? AND pub_id = ?", [req.body.user_id, req.body.idPublication], (error, result) => {
+    console.log(req.body);
+    try{    
+            const user_id = req.body.user.user_id;
+            const idPublication = parseInt(req.body.idProduct);
+            connection.query("DELETE FROM publications WHERE user_id = ? AND pub_id = ?", [user_id, idPublication], (error, result) => {
             if(error){
                 res.send({accepted:false, message:"Ha habido un problema en la base de datos"});
                 console.log(error);
@@ -98,7 +104,9 @@ exports.deletePublication = async(req, res) => {
 
 exports.addInterest = async(req, res) =>{
     try{
-        connection.query("INSERT INTO interests SET ?", {user_id:req.body.userId, pub_id:req.body.idPublication}), (error) =>{
+        const userId = parseInt(req.body.emailOwner);
+        const pubId = parseInt(req.body.idProduct);
+        connection.query("INSERT INTO interests SET ?", {user_id: userId, pub_id:pubId}), (error) =>{
             if(error){
                 res.send({accepted:false, message:"Error de Base de Datos"})
                 console.log(error);
@@ -115,7 +123,9 @@ exports.addInterest = async(req, res) =>{
 
 exports.deleteInterest = async(req, res) =>{
     try{
-        connection.query("DELETE FROM interests WHERE user_id = ? AND pub_id = ?", [req.body.userId, req.body.idPublication]), (error) =>{
+        const userId = req.body.user.user_id;
+        const idPublication = parseInt(req.body.idProduct);
+        connection.query("DELETE FROM interests WHERE user_id = ? AND pub_id = ?", [userId, idPublication]), (error) =>{
             if(error){
                 res.send({accepted:false, message:"Error de Base de Datos"})
                 console.log(error);
@@ -138,11 +148,12 @@ exports.userInterests = async(req, res) =>{
             "publications.title AS titulo, " +
             "publications.type AS productType, " +
             "publications.image_address AS imageAddress, " +
-            "publications.aviable AS isAviable" +           
+            "publications.aviable AS isAviable " +           
         "FROM interests INNER JOIN publications ON interests.pub_id = publications.pub_id " +
-        "WHERE interests.user_id = ?", [req.body.userId] ,
+        "WHERE interests.user_id = ?", [req.body.user.user_id] ,
         (error, result) =>{
             if(error){
+                console.log(error);
                 res.send({accepted:false, message:"Error de base de datos"})
             }else{
                 result.forEach(element => {
@@ -170,7 +181,7 @@ exports.userPublications = async(req, res) => {
             "P.image_address AS imageAddress " +
         "from publications AS P inner Join users AS U on P.user_id = U.user_id "+
         "WHERE U.user_id = ?", 
-        [req.body.userId], (error, result) =>{
+        [req.body.user.user_id], (error, result) =>{
             if(error)
                 console.log(error);
             else{

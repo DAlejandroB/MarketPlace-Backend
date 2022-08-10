@@ -45,12 +45,14 @@ exports.login = async(req, res) => {
                 else{
                     //Token Creation using user unique ID
                     const user_id = results[0].user_id
+                    const user_type = result[0].user_type;
                     const token = jwt.sign({user_id}, process.env.JWT_KEY , {
                         expiresIn : process.env.JWT_EXPIRE_TIME,
                     })
                     const response = {
                         message: 'Succesful Login',
                         user_id: user_id,
+                        user_type: user_type,
                         token: token
                     }
                     res.send(response)
@@ -110,10 +112,14 @@ exports.updatePassword = async(req, res) =>{
 exports.delete = async(req,res) =>{
     try{
         console.log(req.body);
+        connection.query('DELETE FROM interests WHERE user_id = ? ',[req.body.user.user_id]);
+        connection.query('DELETE FROM publications WHERE user_id = ? ',[req.body.user.user_id]);
         connection.query('DELETE FROM users WHERE user_id = ?', [req.body.user.user_id], (error, result) =>{
             if(error) console.log(error);
             console.log(result.affectedRows + " records deleted");
-            res.send("User deleted succesfully")
+            res.send({
+                message :"User deleted succesfully"
+            })
         })
     }catch (error){
         console.log(error)

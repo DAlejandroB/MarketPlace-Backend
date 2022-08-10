@@ -1,9 +1,32 @@
 const connection = require('../database/db')
+const { ImgurClient } = require('imgur');
+const { Readable } = require('stream')
+
+const client = new ImgurClient({ clientId: '713ee8613b65fb1', clientSecret: '7498566159ec695e8ec6535e25cad02e9ec68502'});
+const fs = require('fs');
+
+const uploadImage = async(imageStream, userId, pubId) =>{
+    const response = await client.upload({
+        image: imageStream,
+        title: `pub_img-${userId}${pubId}`
+    })
+    return response.data.link;
+}
+
+const convertB64toStream = async(base64String) => {
+    try{
+        const buffer = Buffer.from(base64String, "base64");
+        return Readable.from(buffer)
+    }catch(error){
+        console.log(error);
+    }
+}
 
 
 //Create/Add publication methods
 exports.addPublication = async(req, res) => {
     const isAviable = req.body.isAviable? 1 : 0;
+    const pubImgAddress = uploadImage(convertB64toStream(req.body.imageAddress));
     try{
         connection.query('INSERT INTO publications SET ?', 
             {
@@ -11,7 +34,7 @@ exports.addPublication = async(req, res) => {
                 title:req.body.title,
                 aviable:isAviable,
                 description:req.body.description,
-                image_address: req.body.imageAddress,
+                image_address: pubImgAddress,
                 type:req.body.publicationType
             }, (error, result)=>{
             if(error){

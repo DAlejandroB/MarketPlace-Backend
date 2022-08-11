@@ -31,5 +31,5 @@ app.use('/', require('./routes/router'))
 
 //Server connection initializing
 app.listen(port , () => {
-    console.log(`App listening at http://localhost:${port}`);
+    console.log(`App listening at port: ${port}`);
 });

@@ -5,7 +5,6 @@ const {response} = require("express");    //For database operations
 
 //Register POST method
 exports.register = async(req, res) => {
-    console.log("Registro de usuario!")
     try{
         const name = req.body.name
         const email = req.body.email

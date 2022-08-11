@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')             //JSON web Token Library used fo
 const bcryptjs = require('bcryptjs')            //Library used for password encryption 
 const connection = require('../database/db')
 const {response} = require("express");    //For database operations
+const tokenConfig = require('./token.config')
 
 //Register POST method
 exports.register = async(req, res) => {
@@ -47,8 +48,8 @@ exports.login = async(req, res) => {
                     //Token Creation using user unique ID
                     const user_id = results[0].user_id
                     const user_type = results[0].user_type;
-                    const token = jwt.sign({user_id}, process.env.JWT_KEY , {
-                        expiresIn : process.env.JWT_EXPIRE_TIME,
+                    const token = jwt.sign({user_id}, tokenConfig.JWT_KEY , {
+                        expiresIn : tokenConfig.JWT_EXPIRE_TIME,
                     })
                     const response = {
                         message: 'Succesful Login',
@@ -150,7 +151,7 @@ exports.isAuthenticated = async(req, res, next) =>{
         })
     }else{
         try{
-            const decoded = jwt.verify(token, process.env.JWT_KEY);
+            const decoded = jwt.verify(token, tokenConfig.JWT_KEY);
             req.body.user = decoded;
         }catch(error){
             return res.send({

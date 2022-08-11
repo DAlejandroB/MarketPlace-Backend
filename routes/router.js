@@ -33,5 +33,7 @@ router.get('/user-interests', userController.isAuthenticated, publications_contr
 
 router.get('/user-publication', userController.isAuthenticated, publications_controller.userPublications);
 
+router.get('/publication-interests', userController.isAuthenticated, publications_controller.getMyPublicationInterests);
+
 module.exports = router
 

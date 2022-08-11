@@ -167,6 +167,30 @@ exports.userInterests = async(req, res) =>{
     }
 }
 
+exports.getMyPublicationInterests = async(req, res) =>{
+    const pubId = req.body.id_publication;
+    try{
+        connection.query('select email, name from users inner join interests on users.user_id = interests.user_id where pub_id = ? ',
+        [pubId], (error,result) =>{
+            if(error){
+                console.log(error)
+                res.send({
+                    accepted:false,
+                    message:'Error de base de datos'
+                })
+            }else{
+                res.send(result);
+            }
+        });
+    }catch(error){
+        console.log(error)
+        res.send({
+            accepted:false,
+            message:'Error de base de datos'
+        })
+    }
+}
+
 exports.userPublications = async(req, res) => {
     try{
         connection.query(

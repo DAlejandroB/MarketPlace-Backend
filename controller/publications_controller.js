@@ -100,20 +100,38 @@ exports.deletePublication = async(req, res) => {
     }
 }
 
+exports.deletePublicationAdmin = async(req, res) => {
+    console.log(req.body);
+    try{
+        const user_id = req.body.user.user_id;
+        const idPublication = parseInt(req.body.idProduct);
+        connection.query("DELETE FROM publications WHERE pub_id = ?", [idPublication], (error, result) => {
+            if(error){
+                res.send({accepted:false, message:"Ha habido un problema en la base de datos"});
+                console.log(error);
+            }else{
+                res.send({accepted:true, message:"Se ha eliminado la publicación exitosamente"});
+            }
+        })
+    }catch(error){
+        console.log(error);
+    }
+}
+
 //AddInterest Method
 
 exports.addInterest = async(req, res) =>{
     try{
         const userId = parseInt(req.body.emailOwner);
         const pubId = parseInt(req.body.idProduct);
-        connection.query("INSERT INTO interests SET ?", {user_id: userId, pub_id:pubId}), (error) =>{
+        connection.query("INSERT INTO interests SET ?", {user_id: userId, pub_id:pubId}, (error, result) =>{
             if(error){
                 res.send({accepted:false, message:"Error de Base de Datos"})
                 console.log(error);
             }else{
                 res.send({accepted:true, message:"Interes Agregado Correctamente"})
             }
-        }
+        })
     }catch(error){
         console.log(error);
     }
@@ -125,14 +143,14 @@ exports.deleteInterest = async(req, res) =>{
     try{
         const userId = req.body.user.user_id;
         const idPublication = parseInt(req.body.idProduct);
-        connection.query("DELETE FROM interests WHERE user_id = ? AND pub_id = ?", [userId, idPublication]), (error) =>{
+        connection.query("DELETE FROM interests WHERE user_id = ? AND pub_id = ?", [userId, idPublication], (error) =>{
             if(error){
                 res.send({accepted:false, message:"Error de Base de Datos"})
                 console.log(error);
             }else{
                 res.send({accepted:true, message:"Interes Eliminado Correctamente"})
             }
-        }
+        })
     }catch(error){
         console.log(error);
     }
@@ -168,7 +186,8 @@ exports.userInterests = async(req, res) =>{
 }
 
 exports.getMyPublicationInterests = async(req, res) =>{
-    const pubId = req.body.id_publication;
+    console.log(req.body)
+    const pubId = parseInt(req.body.id_publication);
     try{
         connection.query('select email, name from users inner join interests on users.user_id = interests.user_id where pub_id = ? ',
         [pubId], (error,result) =>{
@@ -179,6 +198,7 @@ exports.getMyPublicationInterests = async(req, res) =>{
                     message:'Error de base de datos'
                 })
             }else{
+                console.log(result);
                 res.send(result);
             }
         });

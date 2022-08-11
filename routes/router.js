@@ -5,6 +5,12 @@ const userController = require('../controller/user_controller')
 const publications_controller = require('../controller/publications_controller');
 
 //List of hhtp methods related to the user
+router.get('/', (req, res) =>{
+    res.send({
+        message:"App Loaded Correctly"
+    })
+})
+
 router.post('/register', userController.register)
 
 router.post('/login', userController.login)

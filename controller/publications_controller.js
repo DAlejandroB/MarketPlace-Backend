@@ -11,7 +11,6 @@ const uploadImage = async(base64String, userId, pubId) =>{
         image: fs.createReadStream('temp_image.png'),
         title: `pub_img-${userId}${pubId}`
     })
-    console.log(typeof response.data.link);
     return response.data.link;
 }
 
@@ -83,7 +82,6 @@ exports.allPublications = async(req, res) =>{
 
 //Delete publications 
 exports.deletePublication = async(req, res) => {
-    console.log(req.body);
     try{    
             const user_id = req.body.user.user_id;
             const idPublication = parseInt(req.body.idProduct);
@@ -101,7 +99,6 @@ exports.deletePublication = async(req, res) => {
 }
 
 exports.deletePublicationAdmin = async(req, res) => {
-    console.log(req.body);
     try{
         const user_id = req.body.user.user_id;
         const idPublication = parseInt(req.body.idProduct);

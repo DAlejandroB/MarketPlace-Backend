@@ -66,7 +66,6 @@ exports.login = async(req, res) => {
 
 /*Update user data*/
 exports.updateUser = async(req, res) =>{
-    console.log(req.body);
     try{
         connection.query('UPDATE users SET name=? WHERE email = ? ', [req.body.valueNew, req.body.email], (error, result) => {
             if (error) throw console.log(error);
@@ -83,7 +82,6 @@ exports.updateUser = async(req, res) =>{
 }
 exports.updatePassword = async(req, res) =>{
     try{
-        console.log(req.body);
         const userEmail = req.body.email;
         const oldPass = req.body.passOld;
         const newPass = req.body.passNew;
